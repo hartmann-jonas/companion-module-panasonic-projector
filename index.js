@@ -29,6 +29,17 @@ const Constants = {
 	//GridDisplay: 'grid_display',
 	Brightness: 'brightness',
 	LampStatus: 'lamp_state',
+	// TODO: Needs testing
+	LensMemory: 'lens_mem',
+	LoadLensMemory: 'load_lens_mem',
+	CustomMasking: 'custom_masking',
+	EdgeBlending: 'edge_blending',
+	AspectRatio: 'aspect_ratio',
+	Geometry: 'geometry',
+	// Up until here
+	PC1: 'PC-1',
+	PC2: 'PC-2',
+	PC3: 'PC-3',
 	On: 'on',
 	Off: 'off',
 	Toggle: 'toggle',
@@ -113,6 +124,17 @@ class PanasonicInstance extends InstanceBase {
 		this.choiceTestPattern = this.buildList(ntcontrol.TestPattern)
 		this.choiceGridMode = this.buildList(ntcontrol.DisplayGridLines)
 		this.choiceLampState = this.buildList(ntcontrol.LampControlStatus)
+		this.choiceLensMemory = this.buildList(ntcontrol.LensMemory)
+		this.choiceCustomMasking = this.buildList(ntcontrol.CustomMasking)
+		this.choiceEdgeBlending = this.buildList(ntcontrol.EdgeBlending)
+		this.choiceAspectRatio = this.buildList(ntcontrol.Aspect)
+		this.choiceGeometry = this.buildList(ntcontrol.Geometry)
+		/*this.choiceGeometry = [
+			{id: Constants.Off , label: Constants.Off},
+			{id: Constants.PC1 , label: Constants.PC1},
+			{id: Constants.PC2 , label: Constants.PC2},
+			{id: Constants.PC3 , label: Constants.PC3},
+		]*/
 
 		this.choiceOnOff = [
 			{ id: Constants.On, label: Constants.On },
@@ -253,6 +275,87 @@ class PanasonicInstance extends InstanceBase {
 			callback: (action) => {
 				this.projector.setInput(action.options[Constants.InputSource])
 			},
+		}
+
+		actions[Constants.LensMemory] = {
+			name: 'Load Lens Memory',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Lens Memory',
+					id: Constants.LensMemory,
+					default: ntcontrol.LensMemory['LENS MEMORY1'],
+					choices: this.choiceLensMemory,
+				}
+			],
+			callback: (actions) => {
+				this.sendValue(ntcontrol.LensMemoryLoadCommand, actions.options[Constants.LensMemory])
+			}
+		}
+
+		actions[Constants.CustomMasking] = {
+			name: 'Custom Masking',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Custom Masking',
+					id: Constants.CustomMasking,
+					default: '',
+					choices: this.choiceColorMatching,
+				}
+			],
+			callback: (action) => {
+				this.sendValue(ntcontrol.EdgeBlendingCommand, action.options[Constants.CustomMasking])
+			}
+		}
+
+		actions[Constants.EdgeBlending] = {
+			name: 'Change the Edge Blending',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Edge Blending',
+					id: Constants.EdgeBlending,
+					default: '+00000',
+					choices: this.choiceEdgeBlending,
+				}
+			],
+			callback: (action) => {
+				this.sendValue(ntcontrol.EdgeBlendingCommand, action.options[Constants.EdgeBlending])
+			}
+		}
+
+		actions[Constants.AspectRatio] = {
+			name: 'Change the Aspect Ratio',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Aspect Ratio',
+					id: Constants.AspectRatio,
+					default: '0',
+					choices: this.choiceAspectRatio,
+				}
+			],
+			callback: (action) => {
+				this.sendValue(ntcontrol.AspectCommand, action.options[Constants.AspectRatio])
+
+			}
+		}
+
+		actions[Constants.Geometry] = {
+			name: 'Change the Geometry',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'Geometry',
+					id: Constants.Geometry,
+					default: '+00000',
+					choices: this.choiceGeometry,
+				}
+			],
+			callback: (action) => {
+				this.sendValue(ntcontrol.GeometryCommand, action.options[Constants.Geometry])
+			}
 		}
 
 		actions[Constants.ColorMatchingMode] = {
@@ -551,6 +654,21 @@ class PanasonicInstance extends InstanceBase {
 			case 'TestPattern':
 				this.setVariableValues({ [Constants.TestPattern]: ntcontrol.enumValueToLabel(ntcontrol.TestPattern, value) })
 				this.checkFeedbacks(Constants.TestPattern)
+				break
+			case Constants.LoadLensMemory:
+				this.sendValue(ntcontrol.LensMemoryLoadCommand, opt[Constants.LensMemory])
+				break
+			case 'CustomMasking':
+				this.sendValue(ntcontrol.CustomMaskingCommand, opt[Constants.CustomMasking])
+				break
+			case 'EdgeBlending':
+				this.sendValue(ntcontrol.EdgeBlendingCommand, opt[Constants.EdgeBlending])
+				break
+			case 'AspectRatio':
+				this.sendValue(ntcontrol.AspectCommand, opt[Constants.AspectRatio])
+				break
+			case 'Geometry':
+				this.sendValue(ntcontrol.GeometryCommand, opt[Constants.Geometry])
 				break
 			case 'ColorMatching':
 				this.setVariableValues({
